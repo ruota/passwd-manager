@@ -1,5 +1,5 @@
 # passwd-manager
-A little script app to manage encrypted passwords
+A little script app to manage encrypted passwords, it depends from openssl
 
 passwd-manager PASSDB=<password db> option
 options: 

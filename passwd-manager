@@ -16,6 +16,13 @@ function decrypt {
 	openssl aes-256-cbc -d -a -in $1 -out $1.tmp -pass pass:$2 2> /dev/null
 	return $?
 }
+
+if [ ! -e "/usr/bin/openssl" ]
+then
+	echo "passwd-manager require openssl"
+	exit 1
+fi
+
 if [ ! -e $PASSDB ]
 then
 	if [ "$1" == "--init" ]
