@@ -9,12 +9,25 @@ function getPass {
 
 function encrypt {
 	openssl aes-256-cbc -a -salt -in $1.tmp -out $1 -pass pass:$2 2> /dev/null
-	return $?
+	res="$?"
+	echo "$(openssl version)" >> $1
+	return $res
 }
 
 function decrypt {
+	dbSsl=$(grep -i "openssl" $1)
+	if [ ! "$dbSsl" == "" ]
+	then
+		if [ ! "$dbSsl" == "$(openssl version)" ]
+		then
+			echo "alert - PASSDB ssl: $dbSsl sys ssl: $(openssl version)"
+		fi
+		sed -i .bak '$ d' $1
+	fi
 	openssl aes-256-cbc -d -a -in $1 -out $1.tmp -pass pass:$2 2> /dev/null
-	return $?
+	res="$?"
+	echo "$dbSsl" >> $1
+	return $res
 }
 
 if [ ! -e "/usr/bin/openssl" ]
