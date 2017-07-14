@@ -32,9 +32,13 @@ function decrypt {
 	return $res
 }
 
+function error {
+	echo "Error: $1"
+}
+
 if [ ! -e "/usr/bin/openssl" ]
 then
-	echo "passwd-manager require openssl"
+	error "passwd-manager require openssl"
 	exit 1
 else
 	openssl version
@@ -54,10 +58,10 @@ then
 		then
 			echo "DONE -> created"
 		else
-			echo "error"
+			error "encrypt"
 		fi
 	else
-		echo "error invalid PASSDB"
+		error "invalid PASSDB"
 	fi
 
 elif [ "$1" == "--insert" ]
@@ -75,14 +79,14 @@ then
 			then
 				echo "DONE -> added"
 			else
-				echo "error"
+				error "encrypt"
 			fi
 		else
-			echo "user exists"
+			error "user exists"
 		fi	
 		rm $PASSDB.tmp 2> /dev/null
 	else
-		echo "error password"
+		error "password"
 	fi
 
 elif [ "$1" == "--show" ]
@@ -98,7 +102,7 @@ then
             grep $2 $PASSDB.tmp
 		fi
 	else
-		echo "error password"
+		error "password"
 	fi
 	rm $PASSDB.tmp 2> /dev/null
 
@@ -114,11 +118,11 @@ then
 		then
 			echo "DONE -> removed"
 		else
-			echo "error"
+			error "encrypt"
 		fi
 		rm $PASSDB.tmp.bak 2> /dev/null
 	else
-		echo "error password"
+		error "password"
 	fi
 	rm $PASSDB.tmp 2> /dev/null
 
@@ -136,10 +140,10 @@ then
 		then
 			echo "DONE -> changed"
 		else
-			echo "error new password"
+			error "new password"
 		fi
 	else
-		echo "error old password"
+		error "old password"
 	fi
 	rm $PASSDB.tmp 2> /dev/null
 
