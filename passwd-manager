@@ -1,4 +1,10 @@
 #!/bin/bash
+#########################################
+# @author Aruota
+# @brief Password manager
+# @version 1.0
+# @licence gpl2
+#########################################
 
 function getPass {
 	echo -n Password:
@@ -10,24 +16,28 @@ function getPass {
 function encrypt {
 	openssl aes-256-cbc -a -salt -in $1.tmp -out $1 -pass pass:$2 2> /dev/null
 	res="$?"
+	# push openssl version
 	echo "$(openssl version)" >> $1
 	return $res
 }
 
 function decrypt {
 	dbSsl=$(grep -i "openssl" $1)
+	# check openssl version
 	if [ ! "$dbSsl" == "" ]
-	then
+	then 
 		if [ ! "$dbSsl" == "$(openssl version)" ]
 		then
 			echo "Warning - PASSDB ssl: $dbSsl sys ssl: $(openssl version)"
 		fi
+		# pop openssl version
 		sed -i .bak '$ d' $1
 	else
 		echo "Warning - PASSDB: no openssl version"
 	fi
 	openssl aes-256-cbc -d -a -in $1 -out $1.tmp -pass pass:$2 2> /dev/null
 	res="$?"
+	# push openssl version
 	echo "$dbSsl" >> $1
 	return $res
 }
@@ -44,6 +54,7 @@ else
 	openssl version
 fi
 
+# check if password db path exists
 if [ ! -e $PASSDB ]
 then
 	if [ "$1" == "--init" ]
@@ -148,6 +159,7 @@ then
 	rm $PASSDB.tmp 2> /dev/null
 
 else
+	# help
 	echo "passwd-manager PASSDB=<password db> option"
 	echo "options:"
 	echo "    --init"	
