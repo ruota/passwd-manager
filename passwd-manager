@@ -20,9 +20,11 @@ function decrypt {
 	then
 		if [ ! "$dbSsl" == "$(openssl version)" ]
 		then
-			echo "alert - PASSDB ssl: $dbSsl sys ssl: $(openssl version)"
+			echo "Warning - PASSDB ssl: $dbSsl sys ssl: $(openssl version)"
 		fi
 		sed -i .bak '$ d' $1
+	else
+		echo "Warning - PASSDB: no openssl version"
 	fi
 	openssl aes-256-cbc -d -a -in $1 -out $1.tmp -pass pass:$2 2> /dev/null
 	res="$?"
