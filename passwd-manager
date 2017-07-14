@@ -1,0 +1,130 @@
+#!/bin/bash
+
+function getPass {
+	echo -n Password:
+	read -s password
+	echo
+	__=$password
+}
+
+function encrypt {
+	openssl aes-256-cbc -a -salt -in $1.tmp -out $1 -pass pass:$2 2> /dev/null
+	return $?
+}
+
+function decrypt {
+	openssl aes-256-cbc -d -a -in $1 -out $1.tmp -pass pass:$2 2> /dev/null
+	return $?
+}
+if [ ! -e $PASSDB ]
+then
+	if [ "$1" == "--init" ]
+	then
+		if [ ! -e $PASSDB.tmp ]
+		then
+			touch $PASSDB.tmp
+		fi
+		getPass || password=$1
+		encrypt $PASSDB $password
+		if [ $? -eq 0 ]
+		then
+			echo "DONE -> created"
+		else
+			echo "error"
+		fi
+	else
+		echo "error invalid PASSDB"
+	fi
+
+elif [ "$1" == "--insert" ]
+then
+	getPass || password=$1
+	decrypt $PASSDB $password
+	if [ $? -eq 0 ] 
+	then
+		res=$(grep $2 $PASSDB.tmp)
+		if [ "$res" == "" ]
+		then
+			echo "$2 $3" >> $PASSDB.tmp
+			encrypt $PASSDB $password
+			if [ $? -eq 0 ]
+			then
+				echo "DONE -> added"
+			else
+				echo "error"
+			fi
+		else
+			echo "user exists"
+		fi	
+		rm $PASSDB.tmp 2> /dev/null
+	else
+		echo "error password"
+	fi
+
+elif [ "$1" == "--show" ]
+then
+	getPass || password=$1
+	decrypt $PASSDB $password
+	if [ $? -eq 0 ] 
+	then
+		if [ "$2" == "all" ]
+		then
+			cat $PASSDB.tmp	
+		else
+            grep $2 $PASSDB.tmp
+		fi
+	else
+		echo "error password"
+	fi
+	rm $PASSDB.tmp 2> /dev/null
+
+elif [ "$1" == "--remove" ]
+then
+	getPass || password=$1
+	decrypt $PASSDB $password
+	if [ $? -eq 0 ] 
+	then
+		sed -i .bak "/$2/d" $PASSDB.tmp
+		encrypt $PASSDB $password
+		if [ $? -eq 0 ]
+		then
+			echo "DONE -> removed"
+		else
+			echo "error"
+		fi
+		rm $PASSDB.tmp.bak 2> /dev/null
+	else
+		echo "error password"
+	fi
+	rm $PASSDB.tmp 2> /dev/null
+
+elif [ "$1" == "--password" ]
+then
+	echo "Insert Old Password:"
+	getPass || password=$1
+	decrypt $PASSDB $password
+	if [ $? -eq 0 ]
+	then
+		echo "Insert New Password:"
+		getPass || password=$1
+		encrypt $PASSDB $password
+	 	if [ $? -eq 0 ]
+		then
+			echo "DONE -> changed"
+		else
+			echo "error new password"
+		fi
+	else
+		echo "error old password"
+	fi
+	rm $PASSDB.tmp 2> /dev/null
+
+else
+	echo "passwd-manager PASSDB=<password db> option"
+	echo "options:"
+	echo "    --init"	
+	echo "    --insert <user> <password>"
+	echo "    --remove <user>"
+	echo "    --show <user | all>"
+	echo "    --password"
+fi
