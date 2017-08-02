@@ -110,12 +110,22 @@ then
 		then
 			cat $PASSDB.tmp	
 		else
-            grep $2 $PASSDB.tmp
+           		grep $2 $PASSDB.tmp > $PASSDB.tmp2
+			rm $PASSDB.tmp 2> /dev/null
+			cat $PASSDB.tmp2
+
+			echo "Copy Clipboard? (y,n)  "
+			read -n 1 res
+			if [ $res == "y" ]
+			then
+				cat $PASSDB.tmp2 | awk '{ print $NF }' | pbcopy
+			fi
+			echo ""
 		fi
 	else
 		error "password"
 	fi
-	rm $PASSDB.tmp 2> /dev/null
+	rm $PASSDB.tmp2 2> /dev/null	
 
 elif [ "$1" == "--remove" ]
 then
