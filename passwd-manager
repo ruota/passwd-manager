@@ -111,7 +111,6 @@ then
 			cat $PASSDB.tmp	
 		else
            		grep $2 $PASSDB.tmp > $PASSDB.tmp2
-			rm $PASSDB.tmp 2> /dev/null
 			cat $PASSDB.tmp2
 			
 			if [[ $(wc -l < $PASSDB.tmp2) -eq 1 ]]
@@ -128,7 +127,8 @@ then
 	else
 		error "password"
 	fi
-	rm $PASSDB.tmp2 2> /dev/null	
+	rm $PASSDB.tmp 2> /dev/null	
+	rm $PASSDB.tmp2 2> /dev/null
 
 elif [ "$1" == "--remove" ]
 then
